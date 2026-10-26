@@ -1,0 +1,975 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Maison Soleil guest booking confirmation and stay information.">
+    <title>Maison Soleil — Your Stay</title>
+
+    <style>
+        :root {
+            --page-bg: #faf6ef;
+            --card-bg: #fffdf9;
+            --text: #332b24;
+            --muted: #84796d;
+            --border: #e9e1d7;
+            --rust: #a94322;
+            --rust-dark: #87351d;
+            --gold: #f1cc58;
+            --blue: #586bbd;
+            --pink: #b94f76;
+            --shadow: 0 5px 16px rgba(61, 43, 27, 0.07);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            background: var(--page-bg);
+            color: var(--text);
+            font-family: Arial, Helvetica, sans-serif;
+            font-size: 14px;
+        }
+
+        button,
+        a {
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        button {
+            font: inherit;
+            cursor: pointer;
+        }
+
+        h1,
+        h2,
+        h3,
+        p {
+            margin-top: 0;
+        }
+
+        h1,
+        h2 {
+            font-family: Georgia, "Times New Roman", serif;
+            font-weight: normal;
+        }
+
+        .layout {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .side-bar {
+            flex: 0 0 190px;
+            display: flex;
+            flex-direction: column;
+            padding: 20px 12px 16px;
+            border-right: 1px solid var(--border);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            min-height: 38px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .logo img {
+            display: block;
+            max-width: 125px;
+            height: auto;
+        }
+
+        .menu {
+            display: none;
+            border: 0;
+            background: transparent;
+            padding: 8px 0;
+        }
+
+        .links {
+            display: grid;
+            gap: 4px;
+            padding-top: 12px;
+        }
+
+        .links a {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            min-height: 38px;
+            padding: 8px 10px;
+            border-radius: 9px;
+            color: #756b60;
+            text-decoration: none;
+            transition: background-color 160ms ease, color 160ms ease;
+        }
+
+        .links a img {
+            width: 15px;
+            height: 15px;
+            object-fit: contain;
+        }
+
+        .links a:hover,
+        .links a:focus-visible {
+            background: #fffdf9;
+            color: var(--text);
+            outline: none;
+        }
+
+        .links a.active {
+            background: #fffdf9;
+            color: var(--text);
+        }
+
+        .notification {
+            display: inline-grid;
+            place-items: center;
+            width: 14px;
+            height: 14px;
+            margin-left: auto;
+            border-radius: 50%;
+            background: var(--rust);
+            color: white;
+            font-size: 9px;
+        }
+
+        .side-bar-bottom {
+            margin-top: auto;
+            padding-top: 28px;
+        }
+
+        .weather-card {
+            position: relative;
+            overflow: hidden;
+            padding: 14px 12px;
+            border-radius: 13px;
+            background: linear-gradient(120deg, #f7dc76, #f3d56c);
+            color: #59452c;
+        }
+
+        .weather-card::after {
+            content: "";
+            position: absolute;
+            top: -16px;
+            right: -8px;
+            width: 58px;
+            height: 58px;
+            border-radius: 50%;
+            background: #f8e8a2;
+        }
+
+        .eyebrow,
+        .micro-label {
+            font-size: 9px;
+            letter-spacing: 1.3px;
+            text-transform: uppercase;
+        }
+
+        .weather-card h2 {
+            margin: 8px 0 2px;
+            font-size: 28px;
+        }
+
+        .weather-card p {
+            margin-bottom: 0;
+            font-size: 11px;
+        }
+
+        .side-footer {
+            display: grid;
+            gap: 8px;
+            margin-top: 16px;
+            padding-top: 14px;
+            border-top: 1px solid var(--border);
+            color: var(--muted);
+            font-size: 9px;
+            letter-spacing: 1px;
+            line-height: 1.6;
+            text-transform: uppercase;
+        }
+
+        .principal {
+            flex: 1;
+            min-width: 0;
+            padding: 28px 30px 36px;
+        }
+
+        .page-heading {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 20px;
+            margin-bottom: 24px;
+        }
+
+        .booking-status {
+            display: block;
+            margin-bottom: 7px;
+            color: var(--muted);
+            font-size: 9px;
+            letter-spacing: 1.8px;
+        }
+
+        .page-heading h1 {
+            margin-bottom: 0;
+            font-size: clamp(28px, 3vw, 36px);
+            line-height: 1.15;
+        }
+
+        .page-heading h1 em {
+            color: var(--rust);
+            font-weight: normal;
+        }
+
+        .actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            padding-top: 6px;
+        }
+
+        .button {
+            min-height: 36px;
+            padding: 9px 15px;
+            border: 1px solid var(--border);
+            border-radius: 22px;
+            background: #f5f0e8;
+            color: var(--text);
+            font-size: 11px;
+            white-space: nowrap;
+            transition: transform 150ms ease, background-color 150ms ease;
+        }
+
+        .button:hover {
+            transform: translateY(-1px);
+        }
+
+        .button-dark {
+            border-color: #3d3025;
+            background: #3d3025;
+            color: white;
+        }
+
+        .hero {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) 70px minmax(0, 1fr);
+            align-items: center;
+            gap: 18px;
+            max-width: 900px;
+            margin: 8px auto 36px;
+            padding: 0 12px;
+        }
+
+        .receipt {
+            position: relative;
+            padding: 22px 24px 18px;
+            background: var(--card-bg);
+            border: 1px solid rgba(100, 80, 55, 0.06);
+            border-radius: 13px;
+            box-shadow: var(--shadow);
+            transform: rotate(3deg);
+        }
+
+        .receipt-top,
+        .receipt-dates,
+        .receipt-line,
+        .receipt-total,
+        .receipt-bottom {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 14px;
+        }
+
+        .receipt-top {
+            padding-bottom: 14px;
+            border-bottom: 1px dashed var(--border);
+        }
+
+        .receipt-top h2 {
+            margin: 5px 0 0;
+            font-size: 21px;
+        }
+
+        .receipt-number {
+            color: var(--muted);
+            font-size: 8px;
+            line-height: 1.5;
+            text-align: right;
+        }
+
+        .receipt-dates {
+            padding: 14px 0;
+        }
+
+        .receipt-dates > div {
+            min-width: 0;
+        }
+
+        .receipt-dates h3 {
+            margin: 5px 0 3px;
+            font-family: Georgia, "Times New Roman", serif;
+            font-size: clamp(19px, 2vw, 26px);
+            font-weight: normal;
+            white-space: nowrap;
+        }
+
+        .receipt-dates small,
+        .receipt-line,
+        .receipt-bottom {
+            font-size: 10px;
+        }
+
+        .receipt-line {
+            padding: 5px 0;
+        }
+
+        .receipt-total {
+            align-items: center;
+            margin-top: 8px;
+            padding-top: 12px;
+            border-top: 1px solid #b8aa99;
+        }
+
+        .receipt-total strong {
+            font-family: Georgia, "Times New Roman", serif;
+            font-size: 22px;
+            font-weight: normal;
+            white-space: nowrap;
+        }
+
+        .receipt-bottom {
+            align-items: flex-end;
+            margin-top: 12px;
+            color: var(--muted);
+            letter-spacing: 1px;
+        }
+
+        .barcode {
+            display: flex;
+            align-items: stretch;
+            gap: 2px;
+            height: 24px;
+            width: 74px;
+            overflow: hidden;
+        }
+
+        .barcode span {
+            display: block;
+            background: #342d27;
+        }
+
+        .barcode span:nth-child(3n) { width: 3px; }
+        .barcode span:nth-child(3n + 1) { width: 1px; }
+        .barcode span:nth-child(3n + 2) { width: 2px; }
+
+        .sun-mark {
+            display: grid;
+            place-items: center;
+            color: var(--rust);
+            font-size: 60px;
+            line-height: 1;
+        }
+
+        .sun-mark span {
+            display: inline-block;
+            color: var(--gold);
+            text-shadow: 0 0 0 var(--rust);
+            -webkit-text-stroke: 2px var(--rust);
+        }
+
+        .welcome-card {
+            min-height: 300px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 25px;
+            border-radius: 17px;
+            background: linear-gradient(145deg, #c85b2c, #963a1e);
+            color: #fff0d7;
+            box-shadow: 0 18px 32px rgba(139, 55, 26, 0.19);
+            transform: rotate(-5deg);
+        }
+
+        .welcome-card .sun-small {
+            align-self: flex-end;
+            color: var(--gold);
+            font-size: 25px;
+        }
+
+        .welcome-card .note-label {
+            margin-bottom: 10px;
+            color: #f5c9a9;
+            font-family: Georgia, "Times New Roman", serif;
+            font-size: 14px;
+            font-style: italic;
+        }
+
+        .welcome-card h2 {
+            margin-bottom: 14px;
+            color: #fff1d8;
+            font-size: clamp(24px, 2.5vw, 31px);
+            font-style: italic;
+        }
+
+        .welcome-card p {
+            margin-bottom: 0;
+            font-size: 11px;
+            line-height: 1.65;
+        }
+
+        .room-label {
+            display: block;
+            margin-bottom: 4px;
+            color: #f5c9a9;
+            font-size: 8px;
+            letter-spacing: 1.4px;
+        }
+
+        .room-name {
+            font-family: Georgia, "Times New Roman", serif;
+            font-size: 17px;
+        }
+
+        .hover-note {
+            margin: 16px 0 0;
+            color: var(--muted);
+            font-size: 8px;
+            letter-spacing: 1.3px;
+            text-align: center;
+            text-transform: uppercase;
+        }
+
+        .info-cards {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 18px;
+        }
+
+        .info-card {
+            min-width: 0;
+            padding: 16px;
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            background: var(--card-bg);
+            box-shadow: 0 3px 10px rgba(61, 43, 27, 0.035);
+        }
+
+        .info-card-heading {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 18px;
+        }
+
+        .info-card-label {
+            display: flex;
+            align-items: center;
+            gap: 9px;
+            color: var(--rust);
+            font-size: 10px;
+            font-weight: bold;
+            letter-spacing: 1.5px;
+        }
+
+        .info-card-label img {
+            width: 30px;
+            height: 30px;
+            padding: 7px;
+            border-radius: 8px;
+            background: var(--rust);
+            object-fit: contain;
+        }
+
+        .wifi .info-card-label {
+            color: var(--blue);
+        }
+
+        .wifi .info-card-label img {
+            background: var(--blue);
+        }
+
+        .breakfast .info-card-label {
+            color: var(--pink);
+        }
+
+        .breakfast .info-card-label img {
+            background: var(--pink);
+        }
+
+        .card-number {
+            color: var(--rust);
+            font-family: Georgia, "Times New Roman", serif;
+            font-size: 20px;
+        }
+
+        .wifi .card-number {
+            color: var(--blue);
+        }
+
+        .breakfast .card-number {
+            color: var(--pink);
+        }
+
+        .info-card h2 {
+            margin-bottom: 5px;
+            font-size: 20px;
+            line-height: 1.25;
+        }
+
+        .info-card > small {
+            display: block;
+            margin-bottom: 12px;
+            color: var(--muted);
+            font-size: 10px;
+        }
+
+        .info-card p {
+            margin-bottom: 0;
+            color: #5f554a;
+            font-size: 11px;
+            line-height: 1.6;
+        }
+
+        .wifi-details {
+            display: grid;
+            gap: 5px;
+            margin-top: 14px;
+        }
+
+        .wifi-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+            padding: 8px;
+            border-radius: 6px;
+            background: #f3eee7;
+            font-size: 10px;
+        }
+
+        .wifi-row > span:first-child {
+            color: var(--muted);
+            font-size: 8px;
+            letter-spacing: 1px;
+        }
+
+        .wifi-value {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            min-width: 0;
+            text-align: right;
+        }
+
+        .copy-button {
+            padding: 3px 6px;
+            border: 1px solid transparent;
+            border-radius: 10px;
+            background: transparent;
+            color: var(--text);
+            font-size: 9px;
+        }
+
+        .copy-button:hover,
+        .copy-button:focus-visible {
+            border-color: var(--rust);
+            outline: none;
+        }
+
+        .copy-status {
+            min-height: 14px;
+            margin-top: 5px;
+            color: var(--muted);
+            font-size: 10px;
+        }
+
+        @media (max-width: 1050px) {
+            .principal {
+                padding-right: 22px;
+                padding-left: 22px;
+            }
+
+            .hero {
+                grid-template-columns: minmax(0, 1fr) 44px minmax(0, 1fr);
+                gap: 12px;
+            }
+
+            .receipt {
+                padding: 18px;
+            }
+
+            .welcome-card {
+                min-height: 280px;
+                padding: 20px;
+            }
+
+            .info-cards {
+                gap: 12px;
+            }
+
+            .info-card {
+                padding: 14px;
+            }
+        }
+
+        @media (max-width: 760px) {
+            .layout {
+                display: block;
+            }
+
+            .side-bar {
+                display: grid;
+                grid-template-columns: 1fr auto;
+                align-items: center;
+                padding: 14px 18px 10px;
+                border-right: 0;
+                border-bottom: 1px solid var(--border);
+            }
+
+            .logo {
+                padding-bottom: 0;
+                border-bottom: 0;
+            }
+
+            .logo img {
+                max-width: 115px;
+            }
+
+            .menu {
+                display: block;
+            }
+
+            .links {
+                display: none;
+                grid-column: 1 / -1;
+                padding-top: 12px;
+            }
+
+            .links.open {
+                display: grid;
+            }
+
+            .side-bar-bottom {
+                display: none;
+            }
+
+            .principal {
+                padding: 24px 18px 30px;
+            }
+
+            .page-heading {
+                flex-direction: column;
+                gap: 14px;
+                margin-bottom: 20px;
+            }
+
+            .actions {
+                padding-top: 0;
+            }
+
+            .hero {
+                grid-template-columns: minmax(0, 1fr);
+                gap: 24px;
+                max-width: 470px;
+                margin-bottom: 30px;
+                padding: 0 8px;
+            }
+
+            .receipt {
+                transform: rotate(1deg);
+            }
+
+            .sun-mark {
+                display: none;
+            }
+
+            .welcome-card {
+                min-height: 260px;
+                transform: rotate(-1deg);
+            }
+
+            .info-cards {
+                grid-template-columns: minmax(0, 1fr);
+            }
+        }
+
+        @media (min-width: 761px) and (max-width: 900px) {
+            .side-bar {
+                flex-basis: 165px;
+            }
+
+            .info-card h2 {
+                font-size: 18px;
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            *,
+            *::before,
+            *::after {
+                scroll-behavior: auto !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="layout">
+        <aside class="side-bar">
+            <div class="logo">
+                <a href="#" aria-label="Maison Soleil home">
+                    <img src="imagens/logo.svg" alt="Maison Soleil">
+                </a>
+            </div>
+
+            <button class="menu" type="button" aria-expanded="false" aria-controls="navigation">
+                <img src="imagens/icon-menu.svg" alt="" width="22" height="22">
+            </button>
+
+
+            <nav class="links" id="navigation" aria-label="Main navigation">
+                <a class="active" href="#stay">
+                    <img src="imagens/icon-bed.svg" alt="">
+                    <span>Your stay</span>
+                    <span class="notification" aria-label="1 notification">1</span>
+                </a>
+                <a href="#house">
+                    <img src="imagens/icon-house.svg" alt="">
+                    <span>The house</span>
+                </a>
+                <a href="#town">
+                    <img src="imagens/icon-pin.svg" alt="">
+                    <span>Around town</span>
+                </a>
+                <a href="#breakfast">
+                    <img src="imagens/icon-breakfast-outline.svg" alt="">
+                    <span>Breakfast</span>
+                </a>
+                <a href="#messages">
+                    <img src="imagens/icon-mail.svg" alt="">
+                    <span>Messages</span>
+                </a>
+            </nav>
+
+            <div class="side-bar-bottom">
+                <section class="weather-card" aria-label="Today's weather in Cassis">
+                    <small class="eyebrow">Today in Cassis</small>
+                    <h2>27°</h2>
+                    <p>Sunny · light breeze</p>
+                </section>
+
+                <footer class="side-footer">
+                    <span>Est. 1987</span>
+                    <span>Maison Soleil · 12 Rue des Oliviers · Cassis</span>
+                    <span>© 2026 Maison Soleil</span>
+                </footer>
+            </div>
+        </aside>
+
+        <main class="principal" id="stay">
+            <header class="page-heading">
+                <div>
+                    <small class="booking-status">Booking · Confirmed</small>
+                    <h1>Bienvenue, <em>Lucia.</em></h1>
+                </div>
+
+                <div class="actions">
+                    <button class="button" type="button" id="print-receipt">Print receipt</button>
+                    <button class="button button-dark" type="button" id="add-calendar">Add to calendar</button>
+                </div>
+            </header>
+
+            <section class="hero" aria-label="Booking receipt and welcome card">
+                <article class="receipt" id="receipt">
+                    <div class="receipt-top">
+                        <div>
+                            <small class="micro-label">Receipt</small>
+                            <h2>Your stay</h2>
+                        </div>
+                        <div class="receipt-number">
+                            <span>No MS-2026</span><br>
+                            <span>0421-AH</span>
+                        </div>
+                    </div>
+
+                    <div class="receipt-dates">
+                        <div>
+                            <small class="micro-label">Check in</small>
+                            <h3>25 Apr</h3>
+                            <small>Saturday · 15:00</small>
+                        </div>
+                        <div>
+                            <small class="micro-label">Check out</small>
+                            <h3>29 Apr</h3>
+                            <small>Wednesday · 11:00</small>
+                        </div>
+                    </div>
+
+                    <div class="receipt-line">
+                        <span>Room · La Garrigue × 4 nights</span>
+                        <span>€ 620.00</span>
+                    </div>
+                    <div class="receipt-line">
+                        <span>Breakfast × 2 guests</span>
+                        <span>€ 96.00</span>
+                    </div>
+                    <div class="receipt-line">
+                        <span>Tourist tax</span>
+                        <span>€ 14.40</span>
+                    </div>
+
+                    <div class="receipt-total">
+                        <small class="micro-label">Total paid</small>
+                        <strong>€ 730.40</strong>
+                    </div>
+
+                    <div class="receipt-bottom">
+                        <span>Paid · Wise · GBP</span>
+                        <div class="barcode" aria-label="Decorative barcode" aria-hidden="true">
+                            <span></span><span></span><span></span><span></span><span></span>
+                            <span></span><span></span><span></span><span></span><span></span>
+                            <span></span><span></span><span></span><span></span><span></span>
+                            <span></span><span></span><span></span><span></span><span></span>
+                        </div>
+                    </div>
+                </article>
+
+                <div class="sun-mark" aria-hidden="true"><span>☼</span></div>
+
+                <article class="welcome-card">
+                    <div>
+                        <small class="micro-label">Welcome card</small>
+                        <span class="sun-small" aria-hidden="true">☼</span>
+                    </div>
+                    <div>
+                        <p class="note-label">A note from your host,</p>
+                        <h2>Margaux.</h2>
+                        <p>We're so glad you're coming. The shutters will be open, the lemonade cold, and the cat – Poivre – pretending not to notice you.</p>
+                    </div>
+                    <div>
+                        <small class="room-label">Room</small>
+                        <span class="room-name">La Garrigue</span>
+                    </div>
+                </article>
+            </section>
+
+            <p class="hover-note" aria-hidden="true">✦ Hover to fan ✦</p>
+
+            <section class="info-cards" aria-label="Important information">
+                <article class="info-card" id="house">
+                    <div class="info-card-heading">
+                        <div class="info-card-label">
+                            <img src="imagens/icon-key.svg" alt="">
+                            <span>Arrival</span>
+                        </div>
+                        <span class="card-number">01</span>
+                    </div>
+                    <h2>Check-in from 15:00</h2>
+                    <small>Sat, 25 April</small>
+                    <p>Ring the brass bell by the blue door. If we're at the market, the key is in the terracotta pot by the olive tree.</p>
+                </article>
+
+                <article class="info-card wifi" id="wifi">
+                    <div class="info-card-heading">
+                        <div class="info-card-label">
+                            <img src="imagens/icon-wifi.svg" alt="">
+                            <span>WiFi</span>
+                        </div>
+                        <span class="card-number">02</span>
+                    </div>
+                    <h2>Le Soleil · Guest</h2>
+                    <small>Password below</small>
+
+                    <div class="wifi-details">
+                        <div class="wifi-row">
+                            <span>Network</span>
+                            <span class="wifi-value">Le Soleil · Guest</span>
+                        </div>
+                        <div class="wifi-row">
+                            <span>Password</span>
+                            <span class="wifi-value">
+                                <span id="wifi-password">soleil-2026</span>
+                                <button class="copy-button" id="copy-password" type="button">Copy</button>
+                            </span>
+                        </div>
+                    </div>
+                    <div class="copy-status" id="copy-status" aria-live="polite"></div>
+                </article>
+
+                <article class="info-card breakfast" id="breakfast">
+                    <div class="info-card-heading">
+                        <div class="info-card-label">
+                            <img src="imagens/icon-breakfast-outline.svg" alt="">
+                            <span>Breakfast</span>
+                        </div>
+                        <span class="card-number">03</span>
+                    </div>
+                    <h2>Served 8 – 10:30</h2>
+                    <small>On the terrace</small>
+                    <p>Fresh figs, Marseille honey, pain au levain, and espresso. Gluten-free option? Leave a note the night before.</p>
+                </article>
+            </section>
+        </main>
+    </div>
+
+    <script>
+        const menuButton = document.querySelector(".menu");
+        const navigation = document.querySelector("#navigation");
+
+        menuButton.addEventListener("click", () => {
+            const isOpen = navigation.classList.toggle("open");
+            menuButton.setAttribute("aria-expanded", String(isOpen));
+        });
+
+        document.querySelector("#print-receipt").addEventListener("click", () => {
+            window.print();
+        });
+
+        document.querySelector("#copy-password").addEventListener("click", async () => {
+            const password = document.querySelector("#wifi-password").textContent;
+            const status = document.querySelector("#copy-status");
+
+            try {
+                await navigator.clipboard.writeText(password);
+                status.textContent = "Password copied.";
+            } catch {
+                status.textContent = "Copy is unavailable in this browser. Select the password to copy it.";
+            }
+        });
+
+        document.querySelector("#add-calendar").addEventListener("click", () => {
+            const event = [
+                "BEGIN:VCALENDAR",
+                "VERSION:2.0",
+                "PRODID:-//Maison Soleil//Booking//EN",
+                "BEGIN:VEVENT",
+                "UID:maison-soleil-ms-2026-0421-ah",
+                "DTSTAMP:20260101T120000Z",
+                "DTSTART:20260425T140000Z",
+                "DTEND:20260429T100000Z",
+                "SUMMARY:Stay at Maison Soleil - La Garrigue",
+                "LOCATION:Maison Soleil, 12 Rue des Oliviers, Cassis",
+                "END:VEVENT",
+                "END:VCALENDAR"
+            ].join("\r\n");
+
+            const blob = new Blob([event], { type: "text/calendar;charset=utf-8" });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement("a");
+            link.href = url;
+            link.download = "maison-soleil-booking.ics";
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+            URL.revokeObjectURL(url);
+        });
+    </script>
+</body>
+</html>
